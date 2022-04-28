@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
+from rest_framework import viewsets, views
 from rest_framework import permissions
-from GiveMeLabeledIssues.BERT.serializers import UserSerializer, GroupSerializer
+from rest_framework.response import Response
+from rest_framework import status
+from GiveMeLabeledIssues.BERT.serializers import UserSerializer, GroupSerializer, BERTRequestSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -21,3 +23,9 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class BERTRequestView(views.APIView):
+    def get(self, request, project, domains):
+        print("Hit BERT endpoint with GET request!")
+        return Response({"Inputted project name as: " + project + " and domains as: " + domains}, status = status.HTTP_200_OK)

@@ -12,3 +12,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
         fields = ['url', 'name']
+
+class BERTRequestSerializer(serializers.Serializer):
+    project = serializers.CharField()
+    domainlabels = serializers.CharField()
