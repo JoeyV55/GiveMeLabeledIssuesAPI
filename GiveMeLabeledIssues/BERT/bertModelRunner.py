@@ -77,7 +77,7 @@ def predictCombinedProjLabels():
         ]
 
     multiple_predictions = predictor.predict_batch(texts)
-    print(multiple_predictions)
+    return multiple_predictions
         
 
 def runBertPredictions(proj_name):

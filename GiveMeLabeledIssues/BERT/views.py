@@ -29,5 +29,11 @@ class GroupViewSet(viewsets.ModelViewSet):
 class BERTRequestView(views.APIView):
     def get(self, request, project, domains):
         print("Hit BERT endpoint with GET request!")
-        predictCombinedProjLabels()
-        return Response({"Inputted project name as: " + project + " and domains as: " + domains}, status = status.HTTP_200_OK)
+        res = predictCombinedProjLabels()
+        issueListStr = ""
+        i = 1
+        for issue in res:
+            issueListStr += "Issue " + str(i) + ": " + str(issue) + " \n"
+            i += 1
+        print("ISSUESTR: " + issueListStr)
+        return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + issueListStr}, status = status.HTTP_200_OK)
