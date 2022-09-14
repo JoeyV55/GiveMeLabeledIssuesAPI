@@ -5,6 +5,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 from GiveMeLabeledIssues.BERT.serializers import UserSerializer, GroupSerializer, BERTRequestSerializer
+from GiveMeLabeledIssues.BERT.bertModelRunner import *;
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -28,4 +29,5 @@ class GroupViewSet(viewsets.ModelViewSet):
 class BERTRequestView(views.APIView):
     def get(self, request, project, domains):
         print("Hit BERT endpoint with GET request!")
+        predictCombinedProjLabels()
         return Response({"Inputted project name as: " + project + " and domains as: " + domains}, status = status.HTTP_200_OK)
