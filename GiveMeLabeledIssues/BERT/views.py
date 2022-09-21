@@ -29,6 +29,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 class BERTRequestView(views.APIView):
     def get(self, request, project, domains):
         print("Hit BERT endpoint with GET request!")
+        #TODO: Add mining code here to get the issue corpuses. 
         res = predictCombinedProjLabels()
         issueListStr = ""
         i = 1
@@ -36,4 +37,11 @@ class BERTRequestView(views.APIView):
             issueListStr += "Issue " + str(i) + ": " + str(issue) + " \n"
             i += 1
         print("ISSUESTR: " + issueListStr)
+        return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + issueListStr}, status = status.HTTP_200_OK)
+
+
+class MineIssuesView(views.APIView):
+    def get(self, request, project, domains):
+        print("Hit BERT endpoint with GET request!")
+        res = extractIssuesAndClassify()
         return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + issueListStr}, status = status.HTTP_200_OK)

@@ -46,12 +46,18 @@ from fast_bert.learner_cls import BertLearner
 from fast_bert.metrics import accuracy_multilabel, accuracy_thresh, fbeta, roc_auc, F1, Hamming_loss
 from fast_bert.prediction import BertClassificationPredictor
 
+#Extractor import
+import argparse
+from OSLextractor.extractor_driver import get_user_cfg
+from OSLextractor.repo_extractor import conf, schema
+from OSLextractor.repo_extractor.extractor import github_extractor
+from OSLextractor.repo_extractor.utils import file_io_utils as file_io
+
 MODEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/output/model_out/'
+MINING_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/docs/example_io/example_cfg.json'
 
 print("Model path local: " + MODEL_PATH)
-
-def predictJabRefLabels():
-    print("Running JabRef prediction")
+print("Mining config path local: " + MINING_PATH)
 
 def predictCombinedProjLabels():
     print("Running Bert with all model.")
@@ -72,18 +78,34 @@ def predictCombinedProjLabels():
 
     # Batch predictions
     texts = [
-        "this is the first text",
+        "this is the User interface bug",
         "this is the second text"
         ]
 
     multiple_predictions = predictor.predict_batch(texts)
     return multiple_predictions
         
+def extractIssuesAndClassify():
+    """Driver function for GitHub Repo Extractor."""
+    tab: str = " " * 4
+
+    cfg_dict: dict = get_user_cfg(MINING_PATH)
+    cfg_obj = conf.Cfg(cfg_dict, schema.cfg_schema)
+
+    # init extractor object
+    print("\nInitializing extractor...")
+    gh_ext = github_extractor.Extractor(cfg_obj)
+    print(f"{tab}Extractor initialization complete!\n")
+
+    print("Mining repo data...")
+    issuesDict = gh_ext.get_repo_issues_data()
+    print(f"\n{tab}Issue data complete!\n")
+    print(issuesDict)
+
+    print("Extraction complete!\n")
 
 def runBertPredictions(proj_name):
-    if(proj_name == "jabRef"):
-        predictJabRefLabels()
-    elif(proj_name == "all"):
+    if(proj_name == "all"):
         predictCombinedProjLabels()
 
 
