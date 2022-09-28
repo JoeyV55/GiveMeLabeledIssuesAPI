@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from GiveMeLabeledIssues.BERT.serializers import UserSerializer, GroupSerializer, BERTRequestSerializer
 from GiveMeLabeledIssues.BERT.bertModelRunner import *;
+import json
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -43,5 +44,6 @@ class BERTRequestView(views.APIView):
 class MineIssuesView(views.APIView):
     def get(self, request, project, domains):
         print("Hit BERT endpoint with GET request!")
-        res = extractIssuesAndClassify()
-        return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + issueListStr}, status = status.HTTP_200_OK)
+        domainsList = domains.split(',')
+        res = extractIssuesAndClassify(domainsList)
+        return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + json.dumps(res)}, status = status.HTTP_200_OK)
