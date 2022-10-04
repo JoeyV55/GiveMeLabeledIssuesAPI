@@ -1,6 +1,20 @@
 # GiveMeLabeledIssuesAPI
 This is the backend REST API interface that accepts requests to mine and classify open source issues from supported projects. The REST API allows access to both the BERT and TF-IDF (coming soon!) text classification models. 
 
+
+# How to install
+
+Run these commands to run to serve and run the API
+1. Review the system requirements and install the packages needed to run [fast-bert](https://github.com/utterworks/fast-bert)
+2. The packages needed to run the API should be within the issuesenv included in this repo. 
+  
+  <blockquote>source <PATH TO issuesenv>/bin/activate</blockquote>  
+  
+3. Run the server:
+
+<blockquote>python manage.py runserver</blockquote>
+
+
 # Architecture
 
 ### Proof of Concept
