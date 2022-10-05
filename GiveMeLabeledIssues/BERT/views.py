@@ -34,11 +34,15 @@ class BERTRequestView(views.APIView):
         res = predictCombinedProjLabels()
         issueListStr = ""
         i = 1
+        issues = []
+        requestVals = {"issues": []}
         for issue in res:
-            issueListStr += "Issue " + str(i) + ": " + str(issue) + " \n"
+            issueDict = {}
+            issueDict[i] = issue
+            requestVals["issues"].append(issueDict)
             i += 1
-        print("ISSUESTR: " + issueListStr)
-        return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + issueListStr}, status = status.HTTP_200_OK)
+        print("ISSUES: " + str(requestVals))
+        return Response(requestVals, status = status.HTTP_200_OK)
 
 
 class MineIssuesView(views.APIView):

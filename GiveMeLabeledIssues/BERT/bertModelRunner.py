@@ -38,7 +38,7 @@ def predictCombinedProjLabels():
 
     # Single prediction
     single_prediction = predictor.predict("just get me result for this text")
-    print(single_prediction)
+    #print(single_prediction)
 
     # Batch predictions
     texts = [
