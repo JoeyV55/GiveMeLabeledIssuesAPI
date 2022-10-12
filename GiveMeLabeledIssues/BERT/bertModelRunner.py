@@ -33,8 +33,8 @@ def filterLabels(issueLabels):
                 labelStr += ','
         i += 1
     return labelStr
-def predictCombinedProjLabels():
-    print("Running Bert with all model.")
+def predictCombinedProjLabels(texts):
+    print("Running Bert with all model for test endpoint.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
     print(LABEL_PATH)
     
@@ -45,16 +45,6 @@ def predictCombinedProjLabels():
                 model_type='bert',
                 do_lower_case=False,
                 device=None) # set custom torch.device, defaults to cuda if available
-
-    # Single prediction
-    single_prediction = predictor.predict("just get me result for this text")
-    #print(single_prediction)
-
-    # Batch predictions
-    texts = [
-        "this is the User interface bug",
-        "this is the second text"
-        ]
 
     multiple_predictions = predictor.predict_batch(texts)
     return multiple_predictions

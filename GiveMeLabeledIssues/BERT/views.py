@@ -30,15 +30,20 @@ class GroupViewSet(viewsets.ModelViewSet):
 class BERTRequestView(views.APIView):
     def get(self, request, project, domains):
         print("Hit BERT endpoint with GET request!")
-        #TODO: Add mining code here to get the issue corpuses. 
-        res = predictCombinedProjLabels()
+        #Test titles for issues 9191 and 9192
+        titles = [
+        "Allow choosing group when import from browser extension",
+        "Change dark theme colour of highlighted text in Entry Merge Dialogue"
+        ]
+        res = predictCombinedProjLabels(titles)
         issueListStr = ""
-        i = 1
+        i = 0
         issues = []
         requestVals = {"issues": []}
         for issue in res:
             issueDict = {}
-            issueDict["issueNumber"] = 68 + i
+            issueDict["title"] = titles[i]
+            issueDict["issueNumber"] = 9191 + i
             labelStr = filterLabels(issue)
             issueDict["labels"] = labelStr
             i += 1
