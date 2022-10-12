@@ -23,6 +23,16 @@ MINING_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/docs/exa
 print("Model path local: " + MODEL_PATH)
 print("Mining config path local: " + MINING_PATH)
 
+def filterLabels(issueLabels):
+    labelStr = ""
+    i = 0
+    for label in issueLabels:
+        if label[1] >= .6:
+            labelStr += label[0]
+            if i != len(issueLabels) - 1 and issueLabels[i + 1][1] >= .6:
+                labelStr += ','
+        i += 1
+    return labelStr
 def predictCombinedProjLabels():
     print("Running Bert with all model.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
@@ -76,7 +86,7 @@ def classifyMinedIssues(issueNumbers, issueTexts):
     # Single prediction
     single_prediction = predictor.predict(issueTexts[0])
 
-    singlePredDict = {issueNumbers[0] : single_prediction}
+    singlePredDict = {"labels" : single_prediction}
 
     print("PREDICTION FOR ISSUE: " + issueNumbers[0])
     print(singlePredDict)

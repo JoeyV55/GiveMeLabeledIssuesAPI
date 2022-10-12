@@ -38,9 +38,12 @@ class BERTRequestView(views.APIView):
         requestVals = {"issues": []}
         for issue in res:
             issueDict = {}
-            issueDict[i] = issue
-            requestVals["issues"].append(issueDict)
+            issueDict["issueNumber"] = 68 + i
+            labelStr = filterLabels(issue)
+            issueDict["labels"] = labelStr
             i += 1
+            requestVals["issues"].append(issueDict)
+        
         print("ISSUES: " + str(requestVals))
         return Response(requestVals, status = status.HTTP_200_OK)
 
