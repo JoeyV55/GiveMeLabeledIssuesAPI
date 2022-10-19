@@ -43,6 +43,7 @@ class BERTRequestView(views.APIView):
         print(domains)
         requestVals = {"issues": []}
         for issue in res:
+            print("issue", issue)
             issueDict = {}
             issueDict["title"] = titles[i]
             issueDict["issueNumber"] = 9191 + i
@@ -62,5 +63,5 @@ class MineIssuesView(views.APIView):
         project = project.replace(',', '/')
         print(project)
         print(domains)
-        res = extractIssuesAndClassify(project, domainsList)
-        #return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + json.dumps(res)}, status = status.HTTP_200_OK)
+        results = extractIssuesAndClassify(project, domainsList)
+        return Response(results, status = status.HTTP_200_OK)

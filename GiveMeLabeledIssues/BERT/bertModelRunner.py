@@ -23,6 +23,9 @@ MINING_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/docs/exa
 print("Model path local: " + MODEL_PATH)
 print("Mining config path local: " + MINING_PATH)
 
+#Testing limit on number of issues classified.
+issueLimit = 20
+
 def filterLabels(issueLabels):
     labelStr = ""
     i = 0
@@ -33,6 +36,13 @@ def filterLabels(issueLabels):
                 labelStr += ','
         i += 1
     return labelStr
+
+def verifyLabels(labelStr, domains):
+    for domainLabel in domains:
+        if domainLabel in labelStr:
+            return True
+    return False
+
 def predictCombinedProjLabels(texts):
     print("Running Bert with all model for test endpoint.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
@@ -52,15 +62,20 @@ def predictCombinedProjLabels(texts):
 def buildIssueArrays(issuesDict):
     issueNums = list(issuesDict.keys())
     issueTexts = []
+    issueTitles = []
     index = 0
+    print("ISSUESDict: ", issuesDict)
     for issueNum in issueNums:
         issueTexts.append(issuesDict[issueNum]["body"] + issuesDict[issueNum]["title"])
+        issueTitles.append(issuesDict[issueNum]["title"])
         index += 1
-
-    return issueNums, issueTexts
+        if index == issueLimit:
+            break
+    
+    return issueNums, issueTexts, issueTitles
     
 
-def classifyMinedIssues(issueNumbers, issueTexts):
+def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains):
     print("Running Bert with all model.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
     print(LABEL_PATH)
@@ -73,14 +88,30 @@ def classifyMinedIssues(issueNumbers, issueTexts):
                 do_lower_case=False,
                 device=None) # set custom torch.device, defaults to cuda if available
 
-    # Single prediction
-    single_prediction = predictor.predict(issueTexts[0])
+    issues = []
+    print("ISSUETITLES: ", issueTitles)
+    print("ISSUETexts: ", issueTexts)
+    print("ISSUENUMBERS: ", issueNumbers)
+    #print(domains)
+    requestVals = {"issues": []}
+    for i in range(0, len(issueTitles)):
+        print("ISSUE CLASSIFYING: ", i)
+        labelStr = filterLabels(predictor.predict(issueTexts[i]))
+        if not verifyLabels(labelStr, domains):
+            continue
+        issueDict = {}
+        issueDict["title"] = issueTitles[i]
+        issueDict["issueNumber"] = issueNumbers[i]
+        
+        issueDict["labels"] = labelStr
+        i += 1
+        requestVals["issues"].append(issueDict)
+        if i == issueLimit:
+            break
+    
+    print("RequestVals: " + str(requestVals))
 
-    singlePredDict = {"labels" : single_prediction}
-
-    print("PREDICTION FOR ISSUE: " + issueNumbers[0])
-    print(singlePredDict)
-    return singlePredDict
+    return requestVals
     #multiple_predictions = predictor.predict_batch(issueTexts)
     
     #return multiple_predictions
@@ -101,11 +132,11 @@ def extractIssuesAndClassify(project, domains):
     issuesDict = gh_ext.get_repo_issues_data()
     print(f"\n{tab}Issue data complete!\n")
 
-    issueNumbers, issueTexts = buildIssueArrays(issuesDict)
+    issueNumbers, issueTexts, issueTitles = buildIssueArrays(issuesDict)
     print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
 
 
-    return classifyMinedIssues(issueNumbers, issueTexts)
+    return classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains)
 
 def runBertPredictions(proj_name):
     if(proj_name == "all"):
