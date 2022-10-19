@@ -39,6 +39,8 @@ class BERTRequestView(views.APIView):
         issueListStr = ""
         i = 0
         issues = []
+        print(project)
+        print(domains)
         requestVals = {"issues": []}
         for issue in res:
             issueDict = {}
@@ -55,7 +57,10 @@ class BERTRequestView(views.APIView):
 
 class MineIssuesView(views.APIView):
     def get(self, request, project, domains):
-        print("Hit BERT endpoint with GET request!")
+        print("Hit Mine endpoint with GET request!")
         domainsList = domains.split(',')
-        res = extractIssuesAndClassify(domainsList)
-        return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + json.dumps(res)}, status = status.HTTP_200_OK)
+        project = project.replace(',', '/')
+        print(project)
+        print(domains)
+        res = extractIssuesAndClassify(project, domainsList)
+        #return Response({"Inputted project name as: " + project + " and domains as: " + domains + "\n Output: " + json.dumps(res)}, status = status.HTTP_200_OK)

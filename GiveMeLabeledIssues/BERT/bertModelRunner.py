@@ -85,7 +85,7 @@ def classifyMinedIssues(issueNumbers, issueTexts):
     
     #return multiple_predictions
 
-def extractIssuesAndClassify(domains):
+def extractIssuesAndClassify(project, domains):
     """Driver function for GitHub Repo Extractor."""
     tab: str = " " * 4
 
@@ -94,14 +94,14 @@ def extractIssuesAndClassify(domains):
 
     # init extractor object
     print("\nInitializing extractor...")
-    gh_ext = github_extractor.Extractor(cfg_obj)
+    gh_ext = github_extractor.Extractor(project, cfg_obj)
     print(f"{tab}Extractor initialization complete!\n")
 
     print("Mining repo data...")
     issuesDict = gh_ext.get_repo_issues_data()
     print(f"\n{tab}Issue data complete!\n")
 
-    issueNumbers, issueTexts = buildIssueArrays(issuesDict, domains)
+    issueNumbers, issueTexts = buildIssueArrays(issuesDict)
     print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
 
 
