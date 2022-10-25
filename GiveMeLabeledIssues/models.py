@@ -26,6 +26,9 @@ class JabRefIssue(models.Model):
     Security = models.BooleanField()
     App = models.BooleanField()
 
+    def __str__(self): # __str__ for Python 3, __unicode__ for Python 2
+        return self.name
+
 
 class PowerToysIssue(models.Model):
     #Number
@@ -45,3 +48,6 @@ class PowerToysIssue(models.Model):
     UI = models.BooleanField()
     Parser = models.BooleanField()
     App = models.BooleanField()
+
+    def __str__(self): # __str__ for Python 3, __unicode__ for Python 2
+        return self.name

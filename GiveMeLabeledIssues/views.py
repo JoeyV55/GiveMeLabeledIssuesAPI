@@ -4,7 +4,7 @@ from rest_framework import viewsets, views
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
-from GiveMeLabeledIssues.BERT.serializers import UserSerializer, GroupSerializer, BERTRequestSerializer
+from GiveMeLabeledIssues.serializers import UserSerializer, GroupSerializer, BERTRequestSerializer
 from GiveMeLabeledIssues.BERT.bertModelRunner import *;
 import json
 

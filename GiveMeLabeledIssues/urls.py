@@ -14,8 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import include, path
+from django.contrib import admin
 from rest_framework import routers
-from GiveMeLabeledIssues.BERT import views
+from GiveMeLabeledIssues import views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
@@ -25,6 +26,7 @@ router.register(r'groups', views.GroupViewSet)
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(router.urls)),
+    path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('BERT/<str:project>/<str:domains>', views.BERTRequestView.as_view()),
     path('Mine/<str:project>/<str:domains>', views.MineIssuesView.as_view())

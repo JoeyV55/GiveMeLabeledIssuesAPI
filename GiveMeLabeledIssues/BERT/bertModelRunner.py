@@ -11,6 +11,8 @@ import torch
 #import apex
 from fast_bert.prediction import BertClassificationPredictor
 
+from GiveMeLabeledIssues.BERT.databaseUtils import persistToDB
+
 #Extractor import
 from OSLextractor.extractor_driver import get_user_cfg
 from OSLextractor.repo_extractor import conf, schema
@@ -24,7 +26,7 @@ print("Model path local: " + MODEL_PATH)
 print("Mining config path local: " + MINING_PATH)
 
 #Testing limit on number of issues classified.
-issueLimit = 20
+issueLimit = 1
 
 def filterLabels(issueLabels):
     labelStr = ""
@@ -75,7 +77,7 @@ def buildIssueArrays(issuesDict):
     return issueNums, issueTexts, issueTitles
     
 
-def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains):
+def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project):
     print("Running Bert with all model.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
     print(LABEL_PATH)
@@ -106,6 +108,7 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains):
         issueDict["labels"] = labelStr
         i += 1
         requestVals["issues"].append(issueDict)
+        persistToDB(issueNumbers[i], labelStr, project)
         if i == issueLimit:
             break
     
@@ -136,7 +139,7 @@ def extractIssuesAndClassify(project, domains):
     print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
 
 
-    return classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains)
+    return classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
 
 def runBertPredictions(proj_name):
     if(proj_name == "all"):
