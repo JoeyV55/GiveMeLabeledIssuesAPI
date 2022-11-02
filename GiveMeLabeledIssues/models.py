@@ -8,7 +8,8 @@ class JabRefIssue(models.Model):
     issueTitle = models.TextField(default='')
     #Text
     issueText = models.TextField(default='')
-
+    #LabelStr
+    issueLabels = models.TextField(default='')
     #Labels 
     Util = models.BooleanField()
     NLP = models.BooleanField()
@@ -41,7 +42,8 @@ class PowerToysIssue(models.Model):
     issueTitle = models.TextField(default='')
     #Text
     issueText = models.TextField(default='')
-    
+    #LabelStr
+    issueLabels = models.TextField(default='')
     #Labels 
     APM = models.BooleanField()
     Interpreter = models.BooleanField()

@@ -12,6 +12,7 @@ import torch
 from fast_bert.prediction import BertClassificationPredictor
 
 from GiveMeLabeledIssues.BERT.databaseUtils import persistToDB
+from GiveMeLabeledIssues.models import *
 
 #Extractor import
 from OSLextractor.extractor_driver import get_user_cfg
@@ -79,46 +80,18 @@ def buildIssueArrays(issuesDict):
     return issueNums, issueTexts, issueTitles
     
 
-def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project):
+def findIssues(project, labels):
     print("Running Bert with all model.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
-    print(LABEL_PATH)
-    print("TEST")
-    predictor = BertClassificationPredictor(
-                model_path=MODEL_PATH,
-                label_path=LABEL_PATH, # location for labels.csv file
-                multi_label=True,
-                model_type='bert',
-                do_lower_case=False,
-                device=None) # set custom torch.device, defaults to cuda if available
-
-    issues = []
-    print("ISSUETITLES: ", issueTitles)
-    print("ISSUETexts: ", issueTexts)
-    print("ISSUENUMBERS: ", issueNumbers)
-    #print(domains)
-    requestVals = {"issues": []}
-    for i in range(0, len(issueTitles)):
-        print("ISSUE CLASSIFYING: ", i)
-        #TODO: Try catch get to check if issueNumber in DB before running prediction
-        #try get(issueNumber)
-        #except DNE, do the following. 
-        labelStr = filterLabels(predictor.predict(issueTexts[i]))
-        print("Curr issue labels: " + labelStr)
-        if not verifyLabels(labelStr, domains):
-            continue
-        issueDict = {}
-        issueDict["title"] = issueTitles[i]
-        issueDict["issueNumber"] = issueNumbers[i]
-        
-        issueDict["labels"] = labelStr
-        i += 1
-        requestVals["issues"].append(issueDict)
-       # print("AYOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-        persistToDB(issueNumbers[i], labelStr, project)
-        if i == issueLimit:
-            break
+    labelsDict = {}
     
+    if project == "JabRef/jabref":
+        jabrefQs = JabRefIssue.objects
+        for label in labels:
+            currQs = JabRefIssue.objects.filter(issueLabels__contains=label)
+            jabrefQs = currQs | jabrefQs 
+    issues = []
+    #print(domains)
     print("RequestVals: " + str(requestVals))
 
     return requestVals
@@ -126,28 +99,28 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
     
     #return multiple_predictions
 
-def extractIssuesAndClassify(project, domains):
-    """Driver function for GitHub Repo Extractor."""
+# def extractIssuesAndClassify(project, domains):
+#     """Driver function for GitHub Repo Extractor."""
     
-    tab: str = " " * 4
+#     tab: str = " " * 4
 
-    cfg_dict: dict = get_user_cfg(MINING_PATH)
-    cfg_obj = conf.Cfg(cfg_dict, schema.cfg_schema)
+#     cfg_dict: dict = get_user_cfg(MINING_PATH)
+#     cfg_obj = conf.Cfg(cfg_dict, schema.cfg_schema)
 
-    # init extractor object
-    print("\nInitializing extractor...")
-    gh_ext = github_extractor.Extractor(project, cfg_obj)
-    print(f"{tab}Extractor initialization complete!\n")
+#     # init extractor object
+#     print("\nInitializing extractor...")
+#     gh_ext = github_extractor.Extractor(project, cfg_obj)
+#     print(f"{tab}Extractor initialization complete!\n")
 
-    print("Mining repo data...")
-    issuesDict = gh_ext.get_repo_issues_data()
-    print(f"\n{tab}Issue data complete!\n")
+#     print("Mining repo data...")
+#     issuesDict = gh_ext.get_repo_issues_data()
+#     print(f"\n{tab}Issue data complete!\n")
 
-    issueNumbers, issueTexts, issueTitles = buildIssueArrays(issuesDict)
-    print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
+#     issueNumbers, issueTexts, issueTitles = buildIssueArrays(issuesDict)
+#     print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
 
 
-    return classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
+#     return classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
 
 def runBertPredictions(proj_name):
     if(proj_name == "all"):

@@ -49,7 +49,7 @@ class Command(BaseCommand):
             issueDict["issueNumber"] = issueNumbers[i]
             issueDict["issueText"] = issueTexts[i]
         
-            issueDict["labels"] = labelStr
+            issueDict["issueLabels"] = labelStr
             persistToDB(issueDict, project)
 
             i += 1

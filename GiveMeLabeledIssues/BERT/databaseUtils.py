@@ -9,7 +9,7 @@ def persistToDB(issueDict, project):
         storePowerToysIssue(issueDict, project)
 
 def storeJabRefIssue(issueDict, project):
-    labels = issueDict["labels"].split(',')
+    labels = issueDict["issueLabels"].split(',')
     
     Util = 1 if "Util" in labels else 0
     NLP = 1 if "NLP" in labels else 0
@@ -32,7 +32,7 @@ def storeJabRefIssue(issueDict, project):
     App = 1 if "App" in labels else 0
 
     newIssue = {"issueNumber": issueDict["issueNumber"], "issueTitle" : issueDict["issueTitle"], 
-    "issueText" : issueDict["issueText"], "Util": Util, "NLP" : NLP, "APM" : APM, "Network" : Network, 
+    "issueText" : issueDict["issueText"], "issueLabels": issueDict["issueLabels"], "Util": Util, "NLP" : NLP, "APM" : APM, "Network" : Network, 
     "DB": DB, "Interpreter" : Interpreter, "Logging" : Logging, "Data_Structure" : Data_Structure, "i18n" : i18n,
      "DevOps" : DevOps, "Logic" : Logic, "Microservices" : Microservices, "Test" : Test, "Search": Search,
       "IO": IO, "UI" : UI, "Parser" : Parser, "Security" : Security, "App" : App}
@@ -41,6 +41,6 @@ def storeJabRefIssue(issueDict, project):
 
 
 def storePowerToysIssue(issueDict, project):
-    labels = issueDict["labels"].split(',')
+    labels = issueDict["issueLabels"].split(',')
 
     PowerToysIssue.objects.update_or_create()
