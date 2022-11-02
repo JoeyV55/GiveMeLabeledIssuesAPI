@@ -26,15 +26,17 @@ print("Model path local: " + MODEL_PATH)
 print("Mining config path local: " + MINING_PATH)
 
 #Testing limit on number of issues classified.
-issueLimit = 1
+issueLimit = 10
+threshold = .5
 
 def filterLabels(issueLabels):
     labelStr = ""
     i = 0
     for label in issueLabels:
-        if label[1] >= .6:
+       # print(label)
+        if label[1] >= threshold:
             labelStr += label[0]
-            if i != len(issueLabels) - 1 and issueLabels[i + 1][1] >= .6:
+            if i != len(issueLabels) - 1 and issueLabels[i + 1][1] >= threshold:
                 labelStr += ','
         i += 1
     return labelStr
@@ -81,7 +83,7 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
     print("Running Bert with all model.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
     print(LABEL_PATH)
-    
+    print("TEST")
     predictor = BertClassificationPredictor(
                 model_path=MODEL_PATH,
                 label_path=LABEL_PATH, # location for labels.csv file
@@ -98,7 +100,11 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
     requestVals = {"issues": []}
     for i in range(0, len(issueTitles)):
         print("ISSUE CLASSIFYING: ", i)
+        #TODO: Try catch get to check if issueNumber in DB before running prediction
+        #try get(issueNumber)
+        #except DNE, do the following. 
         labelStr = filterLabels(predictor.predict(issueTexts[i]))
+        print("Curr issue labels: " + labelStr)
         if not verifyLabels(labelStr, domains):
             continue
         issueDict = {}
@@ -108,6 +114,7 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
         issueDict["labels"] = labelStr
         i += 1
         requestVals["issues"].append(issueDict)
+       # print("AYOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
         persistToDB(issueNumbers[i], labelStr, project)
         if i == issueLimit:
             break
