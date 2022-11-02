@@ -2,7 +2,7 @@ from GiveMeLabeledIssues.models import *
 
 def persistToDB(issueDict, project):
 
-    if issueDict["project"] == "JabRef/jabref":
+    if project == "JabRef/jabref":
         storeJabRefIssue(issueDict, project)
     
     elif project == "Powertoys/Powertoys":
@@ -32,7 +32,7 @@ def storeJabRefIssue(issueDict, project):
     App = 1 if "App" in labels else 0
 
     newIssue = {"issueNumber": issueDict["issueNumber"], "issueTitle" : issueDict["issueTitle"], 
-    "issueText" : issueDict["issueText"], "Util'": Util, "NLP" : NLP, "APM" : APM, "Network" : Network, 
+    "issueText" : issueDict["issueText"], "Util": Util, "NLP" : NLP, "APM" : APM, "Network" : Network, 
     "DB": DB, "Interpreter" : Interpreter, "Logging" : Logging, "Data_Structure" : Data_Structure, "i18n" : i18n,
      "DevOps" : DevOps, "Logic" : Logic, "Microservices" : Microservices, "Test" : Test, "Search": Search,
       "IO": IO, "UI" : UI, "Parser" : Parser, "Security" : Security, "App" : App}

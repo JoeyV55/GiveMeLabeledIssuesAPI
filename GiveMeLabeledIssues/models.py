@@ -5,9 +5,9 @@ class JabRefIssue(models.Model):
     #Number
     issueNumber = models.IntegerField(primary_key = True, db_column='IssueNumber')
     #Title
-    issueTitle = models.TextField()
+    issueTitle = models.TextField(default='')
     #Text
-    issueText = models.TextField()
+    issueText = models.TextField(default='')
 
     #Labels 
     Util = models.BooleanField()
@@ -31,13 +31,17 @@ class JabRefIssue(models.Model):
     App = models.BooleanField()
 
     def __str__(self): # __str__ for Python 3, __unicode__ for Python 2
-        return self.name
+        return str(self.issueNumber)
 
 
 class PowerToysIssue(models.Model):
     #Number
     issueNumber = models.IntegerField(primary_key = True, db_column='IssueNumber')
-
+    #Title
+    issueTitle = models.TextField(default='')
+    #Text
+    issueText = models.TextField(default='')
+    
     #Labels 
     APM = models.BooleanField()
     Interpreter = models.BooleanField()
@@ -54,4 +58,4 @@ class PowerToysIssue(models.Model):
     App = models.BooleanField()
 
     def __str__(self): # __str__ for Python 3, __unicode__ for Python 2
-        return self.name
+        return str(self.issueNumber)

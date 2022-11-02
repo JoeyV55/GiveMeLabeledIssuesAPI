@@ -1,8 +1,15 @@
 from django.core.management.base import BaseCommand, CommandError
 from fast_bert.prediction import BertClassificationPredictor
 
-from GiveMeLabeledIssues.BERT.bertModelRunner import *
+from GiveMeLabeledIssues.BERT.bertModelRunner import  buildIssueArrays, filterLabels
 from GiveMeLabeledIssues.BERT.databaseUtils import *
+#Extractor import
+from OSLextractor.extractor_driver import get_user_cfg
+from OSLextractor.repo_extractor import conf, schema
+from OSLextractor.repo_extractor.extractor import github_extractor
+from OSLextractor.repo_extractor.utils import file_io_utils as file_io
+
+MINING_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/docs/example_io/example_cfg.json'
 
 class Command(BaseCommand):
     help = 'Populates the JabRef issue database.'
@@ -13,7 +20,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('project')
 
-    def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, project):
+    def classifyMinedIssues(self, issueNumbers, issueTexts, issueTitles, project):
         print("Running Bert with all model.")
         MODEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/output/model_out/'
         LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
@@ -46,8 +53,8 @@ class Command(BaseCommand):
             persistToDB(issueDict, project)
 
             i += 1
-            if i == issueLimit:
-                break
+            #if i == issueLimit:
+            #    break
         
         print("RequestVals: " + str(requestVals))
 
@@ -56,7 +63,7 @@ class Command(BaseCommand):
         
         #return multiple_predictions
 
-    def extractIssuesAndClassify(project):
+    def extractIssuesAndClassify(self, project):
         """Driver function for GitHub Repo Extractor."""
         
         tab: str = " " * 4
@@ -77,7 +84,7 @@ class Command(BaseCommand):
         print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
 
 
-        return classifyMinedIssues(issueNumbers, issueTexts, issueTitles, project)
+        return self.classifyMinedIssues(issueNumbers, issueTexts, issueTitles, project)
 
         
     def handle(self, *args, **options):
@@ -87,4 +94,4 @@ class Command(BaseCommand):
             for project in valid_projects.keys():
                 print(project, end=' ')
             return
-        extractIssuesAndClassify(valid_projects["project"])
+        self.extractIssuesAndClassify(valid_projects[options['project']])
