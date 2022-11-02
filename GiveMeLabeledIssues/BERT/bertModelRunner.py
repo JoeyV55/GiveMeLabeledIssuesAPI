@@ -108,7 +108,7 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
         if not verifyLabels(labelStr, domains):
             continue
         issueDict = {}
-        issueDict["title"] = issueTitles[i]
+        issueDict["title"] = issueTitzles[i]
         issueDict["issueNumber"] = issueNumbers[i]
         
         issueDict["labels"] = labelStr

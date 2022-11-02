@@ -1,3 +1,3 @@
-[submodule "OSL-repo-extractor"]
-	path = OSL-repo-extractor
-	url = https://github.com/JoeyV55/OSL-repo-extractor.git
+[submodule "OSLextractor"]
+	path = OSLextractor
+	url = https://github.com/JoeyV55/OSLextractor.git
