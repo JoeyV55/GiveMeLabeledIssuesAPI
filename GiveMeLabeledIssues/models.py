@@ -4,6 +4,10 @@ from django.db import models
 class JabRefIssue(models.Model):
     #Number
     issueNumber = models.IntegerField(primary_key = True, db_column='IssueNumber')
+    #Title
+    issueTitle = models.TextField()
+    #Text
+    issueText = models.TextField()
 
     #Labels 
     Util = models.BooleanField()

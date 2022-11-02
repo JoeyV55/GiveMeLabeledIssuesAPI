@@ -108,7 +108,7 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
         if not verifyLabels(labelStr, domains):
             continue
         issueDict = {}
-        issueDict["title"] = issueTitzles[i]
+        issueDict["title"] = issueTitles[i]
         issueDict["issueNumber"] = issueNumbers[i]
         
         issueDict["labels"] = labelStr
@@ -128,6 +128,7 @@ def classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
 
 def extractIssuesAndClassify(project, domains):
     """Driver function for GitHub Repo Extractor."""
+    
     tab: str = " " * 4
 
     cfg_dict: dict = get_user_cfg(MINING_PATH)
