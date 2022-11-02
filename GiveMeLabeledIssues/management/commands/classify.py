@@ -81,4 +81,10 @@ class Command(BaseCommand):
 
         
     def handle(self, *args, **options):
-        print(options['project'])
+        valid_projects = {'jabref' : "JabRef/jabref", 'powertoys' : "microsoft/PowerToys"}
+        if options['project'] not in valid_projects:
+            print("Invalid project name. Valid projects are:", end=' ')
+            for project in valid_projects.keys():
+                print(project, end=' ')
+            return
+        extractIssuesAndClassify(valid_projects["project"])
