@@ -63,5 +63,5 @@ class MineIssuesView(views.APIView):
         project = project.replace(',', '/')
         print(project)
         print(domains)
-        results = extractIssuesAndClassify(project, domainsList)
+        results = findIssues(project, domainsList)
         return Response(results, status = status.HTTP_200_OK)

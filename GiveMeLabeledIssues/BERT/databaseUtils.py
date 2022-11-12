@@ -1,11 +1,13 @@
 from GiveMeLabeledIssues.models import *
 
 def persistToDB(issueDict, project):
+    #print("Project", project)
 
     if project == "JabRef/jabref":
         storeJabRefIssue(issueDict, project)
     
-    elif project == "Powertoys/Powertoys":
+    elif project == "microsoft/PowerToys":
+        print("Running powertoys")
         storePowerToysIssue(issueDict, project)
 
 def storeJabRefIssue(issueDict, project):
@@ -42,5 +44,26 @@ def storeJabRefIssue(issueDict, project):
 
 def storePowerToysIssue(issueDict, project):
     labels = issueDict["issueLabels"].split(',')
+    
+    print("Powertoys labels: ", labels)
+    APM = 1 if "APM" in labels else 0
+    Interpreter = 1 if "Interpreter" in labels else 0
+    Logging = 1 if "Logging" in labels else 0
+    Data_Structure = 1 if "Data.Structure" in labels else 0
+    i18n = 1 if "i18n" in labels else 0
+    Setup = 1 if "Setup" in labels else 0
+    Logic = 1 if "Logic" in labels else 0
+    Microservices = 1 if "Microservices" in labels else 0
+    Test = 1 if "Test" in labels else 0
+    Search = 1 if "Search" in labels else 0
+    UI = 1 if "UI" in labels else 0
+    Parser = 1 if "Parser" in labels else 0
+    App = 1 if "App" in labels else 0
 
-    PowerToysIssue.objects.update_or_create()
+    newIssue = {"issueNumber": issueDict["issueNumber"], "issueTitle" : issueDict["issueTitle"], 
+    "issueText" : issueDict["issueText"], "issueLabels": issueDict["issueLabels"], "APM" : APM, 
+    "Interpreter" : Interpreter, "Logging" : Logging, "Data_Structure" : Data_Structure, "i18n" : i18n,
+    "Setup" : Setup, "Logic" : Logic, "Microservices" : Microservices, "Test" : Test, "Search": Search,
+    "UI" : UI, "Parser" : Parser, "App" : App}
+
+    PowerToysIssue.objects.update_or_create(issueNumber=issueDict["issueNumber"], defaults=newIssue)

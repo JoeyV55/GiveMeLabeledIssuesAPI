@@ -84,43 +84,40 @@ def findIssues(project, labels):
     print("Running Bert with all model.")
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
     labelsDict = {}
-    
+    projectQs = []
+    issues = []
+    requestVals = {"issues": []}
+
     if project == "JabRef/jabref":
-        jabrefQs = JabRefIssue.objects
+        projectQs = JabRefIssue.objects.filter(issueLabels__contains=labels[0])
+
         for label in labels:
             currQs = JabRefIssue.objects.filter(issueLabels__contains=label)
-            jabrefQs = currQs | jabrefQs 
-    issues = []
-    #print(domains)
-    print("RequestVals: " + str(requestVals))
+            projectQs.intersection(currQs, projectQs)
 
+        for issue in projectQs:
+            print(issue.issueText)
+
+        
+    elif project == "microsoft/PowerToys":
+        projectQs = PowerToysIssue.objects.filter(issueLabels__contains=labels[0])
+
+        for label in labels:
+            currQs = PowerToysIssue.objects.filter(issueLabels__contains=label)
+            projectQs.intersection(currQs, projectQs)
+
+    i = 0
+    
+    for issue in projectQs:
+        print("ISSUE: ", i)        
+        labelStr = issue.issueLabels
+        issueDict = {}
+        issueDict["issueTitle"] = issue.issueTitle
+        issueDict["issueNumber"] = issue.issueNumber
+        issueDict["issueText"] = issue.issueText
+        issueDict["issueLabels"] = labelStr
+        requestVals["issues"].append(issueDict)
     return requestVals
-    #multiple_predictions = predictor.predict_batch(issueTexts)
-    
-    #return multiple_predictions
-
-# def extractIssuesAndClassify(project, domains):
-#     """Driver function for GitHub Repo Extractor."""
-    
-#     tab: str = " " * 4
-
-#     cfg_dict: dict = get_user_cfg(MINING_PATH)
-#     cfg_obj = conf.Cfg(cfg_dict, schema.cfg_schema)
-
-#     # init extractor object
-#     print("\nInitializing extractor...")
-#     gh_ext = github_extractor.Extractor(project, cfg_obj)
-#     print(f"{tab}Extractor initialization complete!\n")
-
-#     print("Mining repo data...")
-#     issuesDict = gh_ext.get_repo_issues_data()
-#     print(f"\n{tab}Issue data complete!\n")
-
-#     issueNumbers, issueTexts, issueTitles = buildIssueArrays(issuesDict)
-#     print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
-
-
-#     return classifyMinedIssues(issueNumbers, issueTexts, issueTitles, domains, project)
 
 def runBertPredictions(proj_name):
     if(proj_name == "all"):
