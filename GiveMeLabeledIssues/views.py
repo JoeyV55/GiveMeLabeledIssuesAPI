@@ -5,7 +5,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 from GiveMeLabeledIssues.serializers import UserSerializer, GroupSerializer, BERTRequestSerializer
-from GiveMeLabeledIssues.BERT.bertModelRunner import *;
+from GiveMeLabeledIssues.BERT.queryIssues import *;
 import json
 
 
@@ -26,37 +26,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-
-class BERTRequestView(views.APIView):
-    def get(self, request, project, domains):
-        print("Hit BERT endpoint with GET request!")
-        #Test titles for issues 9191 and 9192
-        titles = [
-        "Allow choosing group when import from browser extension",
-        "Change dark theme colour of highlighted text in Entry Merge Dialogue"
-        ]
-        res = predictCombinedProjLabels(titles)
-        issueListStr = ""
-        i = 0
-        issues = []
-        print(project)
-        print(domains)
-        requestVals = {"issues": []}
-        for issue in res:
-            print("issue", issue)
-            issueDict = {}
-            issueDict["title"] = titles[i]
-            issueDict["issueNumber"] = 9191 + i
-            labelStr = filterLabels(issue)
-            issueDict["labels"] = labelStr
-            i += 1
-            requestVals["issues"].append(issueDict)
-        
-        print("ISSUES: " + str(requestVals))
-        return Response(requestVals, status = status.HTTP_200_OK)
-
-
-class MineIssuesView(views.APIView):
+class QueryIssuesView(views.APIView):
     def get(self, request, project, domains):
         print("Hit Mine endpoint with GET request!")
         domainsList = domains.split(',')

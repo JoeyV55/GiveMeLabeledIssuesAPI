@@ -28,6 +28,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('BERT/<str:project>/<str:domains>', views.BERTRequestView.as_view()),
-    path('Mine/<str:project>/<str:domains>', views.MineIssuesView.as_view())
+    path('Query/<str:project>/<str:domains>', views.QueryIssuesView.as_view())
 ]
