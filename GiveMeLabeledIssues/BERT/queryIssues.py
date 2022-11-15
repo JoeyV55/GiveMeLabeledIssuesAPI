@@ -32,6 +32,13 @@ def findIssues(project, labels):
         for label in labels:
             currQs = PowerToysIssue.objects.filter(issueLabels__contains=label)
             projectQs.intersection(currQs, projectQs)
+    
+    elif project == "audacity/audacity":
+        projectQs = AudacityIssue.objects.filter(issueLabels__contains=labels[0])
+
+        for label in labels:
+            currQs = AudacityIssue.objects.filter(issueLabels__contains=label)
+            projectQs.intersection(currQs, projectQs)
 
     i = 0
     

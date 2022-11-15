@@ -4,13 +4,19 @@ def persistToDB(issueDict, project):
     #print("Project", project)
 
     if project == "JabRef/jabref":
-        storeJabRefIssue(issueDict, project)
+        storeJabRefIssue(issueDict)
     
     elif project == "microsoft/PowerToys":
         print("Running powertoys")
-        storePowerToysIssue(issueDict, project)
+        storePowerToysIssue(issueDict)
+    
+    elif project == "audacity/audacity":
+        print("Running audacity")
+        storeAudacityIssue(issueDict)
+        
 
-def storeJabRefIssue(issueDict, project):
+
+def storeJabRefIssue(issueDict):
     labels = issueDict["issueLabels"].split(',')
     
     Util = 1 if "Util" in labels else 0
@@ -42,7 +48,7 @@ def storeJabRefIssue(issueDict, project):
     JabRefIssue.objects.update_or_create(issueNumber=issueDict["issueNumber"], defaults=newIssue)
 
 
-def storePowerToysIssue(issueDict, project):
+def storePowerToysIssue(issueDict):
     labels = issueDict["issueLabels"].split(',')
     
     print("Powertoys labels: ", labels)
@@ -67,3 +73,37 @@ def storePowerToysIssue(issueDict, project):
     "UI" : UI, "Parser" : Parser, "App" : App}
 
     PowerToysIssue.objects.update_or_create(issueNumber=issueDict["issueNumber"], defaults=newIssue)
+
+
+def storeAudacityIssue(issueDict):
+    labels = issueDict["issueLabels"].split(',')
+    
+    print("Audacity labels: ", labels)
+    Util = 1 if "Util" in labels else 0
+    APM = 1 if "APM" in labels else 0
+    Network = 1 if "Network" in labels else 0
+    DB = 1 if "DB" in labels else 0
+    Error_Handling = 1 if "Error.Handling" in labels else 0
+    Logging = 1 if "Logging" in labels else 0
+    Lang = 1 if "Lang" in labels else 0
+    Data_Structure = 1 if "Data.Structure" in labels else 0
+    i18n = 1 if "i18n" in labels else 0
+    Setup = 1 if "Setup" in labels else 0
+    Logic = 1 if "Logic" in labels else 0
+    IO = 1 if "IO" in labels else 0
+    UI = 1 if "UI" in labels else 0
+    Parser = 1 if "Parser" in labels else 0
+    Event_Handling = 1 if "Event.Handling" in labels else 0
+    App = 1 if "App" in labels else 0
+    GIS = 1 if "GIS" in labels else 0
+    Multimedia = 1 if "Multimedia" in labels else 0
+    CG = 1 if "CG" in labels else 0
+
+    newIssue = {"issueNumber": issueDict["issueNumber"], "issueTitle" : issueDict["issueTitle"], 
+    "issueText" : issueDict["issueText"], "issueLabels": issueDict["issueLabels"], "Util" : Util, "APM" : APM, 
+    "Network" : Network, "DB" : DB, "Error_Handling" : Error_Handling, "Logging" : Logging, "Lang" : Lang, 
+    "Data_Structure" : Data_Structure, "i18n" : i18n, "Setup" : Setup, "Logic" : Logic, 
+    "IO" : IO, "UI" : UI, "Parser" : Parser, "Event_Handling" : Event_Handling, "App" : App, "GIS" : GIS, 
+    "Multimedia" : Multimedia, "CG" : CG}
+
+    AudacityIssue.objects.update_or_create(issueNumber=issueDict["issueNumber"], defaults=newIssue)

@@ -38,11 +38,21 @@ class Command(BaseCommand):
         issueTexts = []
         issueTitles = []
         index = 0
-        print("ISSUESDict: ", issuesDict)
+        #print("ISSUESDict: ", issuesDict)
 
         for issueNum in issueNums:
-            issueTexts.append(issuesDict[issueNum]["body"] + issuesDict[issueNum]["title"])
-            issueTitles.append(issuesDict[issueNum]["title"])
+            titleText = "" 
+            bodyText = ""  
+
+            if issuesDict[issueNum]["title"] is not None:
+                titleText = issuesDict[issueNum]["title"] 
+            if issuesDict[issueNum]["body"] is not None:
+                bodyText = issuesDict[issueNum]["body"]
+
+            print("BODY TEXT: ", type(issuesDict[issueNum]["body"]))
+            print("TITLE TEXT: ", type(titleText)) 
+            issueTexts.append(bodyText + titleText)
+            issueTitles.append(titleText)
             index += 1
 
         return issueNums, issueTexts, issueTitles
@@ -135,7 +145,7 @@ class Command(BaseCommand):
         #Run TF-IDF classification with issueDf. 
     
     def handle(self, *args, **options):
-        valid_projects = {'jabref' : "JabRef/jabref", 'powertoys' : "microsoft/PowerToys"}
+        valid_projects = {'jabref' : "JabRef/jabref", 'powertoys' : "microsoft/PowerToys", 'audacity' : "audacity/audacity"}
         valid_classifiers = ['BERT', 'TFIDF']
 
         if options['project'] not in valid_projects:
