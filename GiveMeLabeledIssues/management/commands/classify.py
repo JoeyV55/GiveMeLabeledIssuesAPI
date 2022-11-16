@@ -61,13 +61,21 @@ class Command(BaseCommand):
     def buildIssueDf(self, issuesDict):
         issueNums = list(issuesDict.keys())
         issueTexts = []
-        index = 0
-        
+        issueTitles = []
+
         for issueNum in issueNums:
-            issueTexts.append(issuesDict[issueNum]["body"] + issuesDict[issueNum]["title"])
-            index += 1
-    
-        return issueNums, issueTexts
+            titleText = "" 
+            bodyText = ""  
+            if issuesDict[issueNum]["title"] is not None:
+                titleText = issuesDict[issueNum]["title"] 
+            if issuesDict[issueNum]["body"] is not None:
+                bodyText = issuesDict[issueNum]["body"] 
+            issueTexts.append(bodyText + titleText)
+            issueTitles.append(titleText)
+            
+        issuesDict = {"IssueNumber" : issueNums, "IssueText" : issueTexts}
+        issuesDf = pd.DataFrame(data=issuesDict)
+        return issuesDf
 
     def filterLabels(self, issueLabels):
         labelStr = ""
