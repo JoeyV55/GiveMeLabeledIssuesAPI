@@ -1,0 +1,16 @@
+{
+    "repo": "JabRef/jabref",
+    "auth_path": "/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/pyGHTok.txt",
+    "output_path": "/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/output/issueOutput.json",
+    "range": [
+        0,
+        10000
+    ],
+    "state": "open",
+    "comments": [],
+    "commits": [],
+    "issues": [
+        "body",
+        "title"
+    ]
+}
