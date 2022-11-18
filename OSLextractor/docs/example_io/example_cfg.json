@@ -1,0 +1,16 @@
+{
+    "repo": "JabRef/jabref",
+    "auth_path": "/Users/fd252/Documents/GitHub/OSL-repo-extractor/data/auth/fabio_auth2.txt",
+    "output_path": "/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/OSLextractor/output/issueOutput.json",
+    "range": [
+        0,
+        10000
+    ],
+    "state": "open",
+    "comments": [],
+    "commits": [],
+    "issues": [
+        "body",
+        "title"
+    ]
+}

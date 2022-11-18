@@ -1,4 +1,4 @@
-#!/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/issuesenv/bin/python3
+#!/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/issuesenv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
