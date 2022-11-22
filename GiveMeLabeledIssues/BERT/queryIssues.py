@@ -20,7 +20,9 @@ def findIssues(project, labels):
 
         for label in labels:
             currQs = JabRefIssue.objects.filter(issueLabels__contains=label)
-            projectQs.intersection(currQs, projectQs)
+            print("LABEL: ", label, " currQS: ", currQs)
+            projectQs = projectQs.union(currQs)
+            print("ProjectQs: ", projectQs)
 
         for issue in projectQs:
             print(issue.issueText)
@@ -31,19 +33,16 @@ def findIssues(project, labels):
 
         for label in labels:
             currQs = PowerToysIssue.objects.filter(issueLabels__contains=label)
-            projectQs.intersection(currQs, projectQs)
+            projectQs = projectQs.union(currQs)
     
     elif project == "audacity/audacity":
         projectQs = AudacityIssue.objects.filter(issueLabels__contains=labels[0])
 
         for label in labels:
             currQs = AudacityIssue.objects.filter(issueLabels__contains=label)
-            projectQs.intersection(currQs, projectQs)
-
-    i = 0
+            projectQs = projectQs.union(currQs)
     
     for issue in projectQs:
-        print("ISSUE: ", i)        
         labelStr = issue.issueLabels
         issueDict = {}
         issueDict["issueTitle"] = issue.issueTitle
