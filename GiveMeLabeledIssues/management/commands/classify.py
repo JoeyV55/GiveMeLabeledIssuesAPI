@@ -1,37 +1,27 @@
-from csv import reader
 import sys
 import warnings
-from django.core.management.base import BaseCommand, CommandError
-from fast_bert.prediction import BertClassificationPredictor
-from GiveMeLabeledIssues.BERT.databaseUtils import *
+from django.core.management.base import BaseCommand
+from GiveMeLabeledIssues.databaseUtils import *
 
 #TF-IDF imports and cleaning
 from nltk.corpus import stopwords 
-from nltk.tokenize import word_tokenize 
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer 
-from os import path
-from sklearn.metrics import hamming_loss, accuracy_score, roc_curve, auc, roc_auc_score, f1_score, multilabel_confusion_matrix, precision_recall_fscore_support
 import pandas as pd
-import numpy as np
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 from skmultilearn.problem_transform import BinaryRelevance
 import re 
-from sklearn.model_selection import ShuffleSplit
 
-#import apex
-from fast_bert.prediction import BertClassificationPredictor
 
 #Extractor import
 from OSLextractor.extractor_driver import get_user_cfg
 from OSLextractor.repo_extractor import conf, schema
 from OSLextractor.repo_extractor.extractor import github_extractor
-from OSLextractor.repo_extractor.utils import file_io_utils as file_io
 
 MINING_PATH = '/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/OSLextractor/docs/example_io/example_cfg.json'
 PROBABILITY_THRESHOLD = .5
-ISSUE_LIMIT = 1
+ISSUE_LIMIT = 10
 class Command(BaseCommand):
     help = 'Populates the project issue database tables.'
 
@@ -39,21 +29,6 @@ class Command(BaseCommand):
         parser.add_argument('project')
         parser.add_argument('classifier')
 
-    #Used for BERT  
-    def buildIssueArrays(self, issuesDict):
-        issueNums = list(issuesDict.keys())
-        issueTexts = []
-        issueTitles = []
-        index = 0
-        print("ISSUESDict: ", issuesDict)
-
-        for issueNum in issueNums:
-            issueTexts.append(issuesDict[issueNum]["body"] + issuesDict[issueNum]["title"])
-            issueTitles.append(issuesDict[issueNum]["title"])
-            index += 1
-
-        return issueNums, issueTexts, issueTitles
-    
     #Used for TF-IDF
     def buildIssueDf(self, issuesDict):
         issueNums = list(issuesDict.keys())
@@ -86,43 +61,6 @@ class Command(BaseCommand):
                     labelStr += ','
             i += 1
         return labelStr
-
-    def classifyMinedIssuesBERT(self, issueNumbers, issueTexts, issueTitles, project):
-        print("Running Bert with all model.")
-        MODEL_PATH = '/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/BERT/BERTModels/output/model_out/'
-        LABEL_PATH = '/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/BERT/BERTModels/labels/all/'
-        #print(LABEL_PATH)
-        predictor = BertClassificationPredictor(
-                    model_path=MODEL_PATH,
-                    label_path=LABEL_PATH, # location for labels.csv file
-                    multi_label=True,
-                    model_type='bert',
-                    do_lower_case=False,
-                    device=None) # set custom torch.device, defaults to cuda if available
-
-        issues = []
-        # print("ISSUETITLES: ", issueTitles)
-        # print("ISSUETexts: ", issueTexts)
-        # print("ISSUENUMBERS: ", issueNumbers)
-        #print(domains)
-        requestVals = {"issues": []}
-        for i in range(0, len(issueTitles)):
-            print("ISSUE CLASSIFYING: ", i)
-            
-            labelStr = self.filterLabels(predictor.predict(issueTexts[i]))
-            issueDict = {}
-            issueDict["issueTitle"] = issueTitles[i]
-            issueDict["issueNumber"] = issueNumbers[i]
-            issueDict["issueText"] = issueTexts[i]
-        
-            issueDict["issueLabels"] = labelStr
-            persistToDB(issueDict, project)
-
-            i += 1
-            if i > ISSUE_LIMIT:
-                break
-
-        return requestVals        
 
     def clean_data(self, data_test1):
         if not sys.warnoptions:
@@ -243,7 +181,7 @@ class Command(BaseCommand):
 
         return clf
 
-    def run_predictions(self, dataset, num_feature, final_columns, predictions_result, labels):
+    def run_predictions(self, dataset, num_feature, final_columns, predictions_result, labels, projectShort):
 
         max_f = final_columns[len(final_columns)-1]
         min_f = final_columns[0]
@@ -251,7 +189,11 @@ class Command(BaseCommand):
         print('dataset:',dataset.columns)
         # each project's model was trained with different number of columns! JabRef has 720. 
         #X_test = dataset.iloc[:,2:len(dataset.columns)]
-        sliced = dataset.iloc[:,4:724].copy()
+        if projectShort == 'jabref':
+            sliced = dataset.iloc[:,4:724].copy()
+        elif projectShort == 'powertoys':
+                sliced = dataset.iloc[:,4:2058].copy()
+
         print("sliced type",type(sliced))
         print("sliced shape",sliced.shape)
         X_test = sliced.reset_index(drop=True)
@@ -283,7 +225,7 @@ class Command(BaseCommand):
         #mergedDf.to_csv(predictions_result+'_data_merge-' + str(i) +'.csv' , encoding='utf-8', header=True, index=False , sep=',') #x = prediction
         return mergedDf
 
-    def classifyMinedIssuesTFIDF(self, issuesDF, project):
+    def classifyMinedIssuesTFIDF(self, issuesDF, project, projectShort):
             print("Running TFIDF with all model.")
             MODEL_PATH_TFIDF = '/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/GiveMeLabeledIssues/TFIDF/TFIDFModels/'
             #example: /Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/GiveMeLabeledIssues/TFIDF/TFIDFModels/jabref_finalized_model.sav
@@ -303,7 +245,7 @@ class Command(BaseCommand):
             data = data_test1
 
             data_test1 = self.apply_stem(data)
-            print('data_test1',data_test1.columns)
+           # print('data_test1',data_test1.columns)
 
             docs, a = self.analyze_top(data_test1)
             num_feature = len(a)
@@ -311,15 +253,19 @@ class Command(BaseCommand):
 
             data_classifier, categories = self.merging_fast(data_test1, features)  
 
-            predictions_result = MODEL_PATH_TFIDF + 'jabref_finalized_model.sav'
+            predictions_result = MODEL_PATH_TFIDF + projectShort + '_model.sav'
             print("model at:", predictions_result, "project:",project)
             
             final_columns = data_classifier.columns
-            
-            #POC dones't have grount truth = categories. So labels are fixed:
-            labels = ['Network', 'DB', 'Interpreter', 'Logging', 'Data Structure', 'i18n', 'Setup', 'Microservices', 'Test', 'IO', 'UI', 'App']
+            print("final columns:", final_columns)
 
-            predictions = self.run_predictions(data_classifier, num_feature, final_columns, predictions_result, labels)
+            #POC dones't have grount truth = categories. So labels are fixed:
+            if projectShort == 'jabref': 
+                labels = ['Network', 'DB', 'Interpreter', 'Logging', 'Data Structure', 'i18n', 'Setup', 'Microservices', 'Test', 'IO', 'UI', 'App']
+            elif projectShort == 'powertoys':
+                labels = ['APM','Interpreter','Logging','Data Structure','i18n','Setup','Logic','Microservices','Test','Search','UI','Parser','App']
+
+            predictions = self.run_predictions(data_classifier, num_feature, final_columns, predictions_result, labels, projectShort)
 
             issueTitles = []
             issueNumbers = []
@@ -332,30 +278,50 @@ class Command(BaseCommand):
             # predicions file contains the labels with 1s and 0s and the issueNumber_dc columns     
 
             issues = []
+            labelStr = ""
             # print("ISSUETITLES: ", issueTitles)
             # print("ISSUETexts: ", issueTexts)
             # print("ISSUENUMBERS: ", issueNumbers)
             #print(domains)
+            print("\n==========================\nPREDICTIONS\n===========================\n", predictions)
+            #print(predictions.columns)
             requestVals = {"issues": []}
-            for i in range(0, len(issueTitles)):
-                print("ISSUE CLASSIFYING: ", i)
-                
-                labelStr = "TODO"
+            i = 0
+            for index, row in predictions.iterrows():
+                labelStr = ""
+                labelCount = 0
+              #  print("ROW: ", i)
+                for column in predictions.columns:
+                   # print("COLUMN TYPE: ", type(column))
+                    if column.strip() == 'IssueNumber_dc': 
+                       # print("Ënding row")
+                        break
+
+                   # print("Column: ", column)
+                   # print("Value: ", row[column])
+                    if row[column] == 1.0:
+                        labelStr += column.strip().replace(" ", '.')
+                        labelStr += ","
+                        labelCount += 1
+                if labelCount > 1:
+                    labelStr = labelStr[:-1]
+
+               # print("ISSUE: ", i, " LABELS: ", labelStr)
                 issueDict = {}
-                issueDict["issueTitle"] = issueTitles[i]
-                issueDict["issueNumber"] = issueNumbers[i]
-                issueDict["issueText"] = issueTexts[i]
+                issueDict["issueTitle"] = row["IssueTitle"]
+                issueDict["issueNumber"] = row["IssueNumber_dc"]
+                issueDict["issueText"] = row["IssueText"]
             
                 issueDict["issueLabels"] = labelStr
                 persistToDB(issueDict, project)
 
-                i += 1
-                if i == ISSUE_LIMIT:
-                    break
+                #i += 1
+                #if i == ISSUE_LIMIT:
+                #    break
 
             return requestVals   
 
-    def extractIssuesAndClassify(self, project, classifier):
+    def extractIssuesAndClassify(self, project, projectShort, classifier):
         """Driver function for GitHub Repo Extractor."""
         
         tab: str = " " * 4
@@ -372,21 +338,16 @@ class Command(BaseCommand):
         issuesDict = gh_ext.get_repo_issues_data()
         print(f"\n{tab}Issue data complete!\n")
 
-        if classifier == 'BERT':
-            issueNumbers, issueTexts, issueTitles = self.buildIssueArrays(issuesDict)
-            print("IssueNumber: " + issueNumbers[0] + " IssueText: " + issueTexts[0])
-            return self.classifyMinedIssuesBERT(issueNumbers, issueTexts, issueTitles, project)
-        
-        #Otherwise do TF-IDF, TODO make elif when Doc2Vec is inserted.
+       # TODO make elif when Doc2Vec is inserted.
         issueDf = self.buildIssueDf(issuesDict)
         #Run TF-IDF classification with issueDf. 
         if classifier == 'TFIDF':
             print("TFIDF - Issue: " + issueDf.iloc[0])
-            return self.classifyMinedIssuesTFIDF(issueDf, project)
+            return self.classifyMinedIssuesTFIDF(issueDf, project, projectShort)
     
     def handle(self, *args, **options):
         valid_projects = {'jabref' : "JabRef/jabref", 'powertoys' : "microsoft/PowerToys"}
-        valid_classifiers = ['BERT', 'TFIDF']
+        valid_classifiers = ['TFIDF']
 
         if options['project'] not in valid_projects:
             print("Invalid project name. Valid projects are:", end=' ')
@@ -394,10 +355,10 @@ class Command(BaseCommand):
                 print(project, end=' ')
             return
         if options['classifier'] not in valid_classifiers:
-            print("Invalid project name. Valid projects are:", end=' ')
+            print("Invalid classifier name. Valid classifiers are:", end=' ')
             for classifier in valid_classifiers:
                 print(classifier, end=' ')
             return
         
-        self.extractIssuesAndClassify(valid_projects[options['project']], options['classifier'])
+        self.extractIssuesAndClassify(valid_projects[options['project']], options['project'], options['classifier'])
 

@@ -5,7 +5,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 from GiveMeLabeledIssues.serializers import UserSerializer, GroupSerializer, BERTRequestSerializer
-from GiveMeLabeledIssues.BERT.queryIssues import *;
+from GiveMeLabeledIssues.queryIssues import *;
 import json
 
 

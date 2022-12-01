@@ -7,7 +7,6 @@ def persistToDB(issueDict, project):
         storeJabRefIssue(issueDict, project)
     
     elif project == "microsoft/PowerToys":
-        print("Running powertoys")
         storePowerToysIssue(issueDict, project)
 
 def storeJabRefIssue(issueDict, project):
@@ -45,7 +44,6 @@ def storeJabRefIssue(issueDict, project):
 def storePowerToysIssue(issueDict, project):
     labels = issueDict["issueLabels"].split(',')
     
-    print("Powertoys labels: ", labels)
     APM = 1 if "APM" in labels else 0
     Interpreter = 1 if "Interpreter" in labels else 0
     Logging = 1 if "Logging" in labels else 0
