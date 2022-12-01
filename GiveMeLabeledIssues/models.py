@@ -55,7 +55,7 @@ class PowerToysIssue(models.Model):
     Microservices = models.BooleanField()
     Test = models.BooleanField()
     Search = models.BooleanField()
-    UI = models.BooleanField()
+    UI = models.BooleanField() 
     Parser = models.BooleanField()
     App = models.BooleanField()
 
