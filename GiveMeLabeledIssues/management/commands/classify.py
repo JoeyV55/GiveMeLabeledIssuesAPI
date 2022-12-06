@@ -2,7 +2,7 @@ import sys
 import warnings
 from django.core.management.base import BaseCommand
 from GiveMeLabeledIssues.databaseUtils import *
-
+import numpy as np
 #TF-IDF imports and cleaning
 from nltk.corpus import stopwords 
 from nltk.stem.snowball import SnowballStemmer
@@ -12,6 +12,7 @@ import pickle
 from sklearn.ensemble import RandomForestClassifier
 from skmultilearn.problem_transform import BinaryRelevance
 import re 
+from sklearn.model_selection import train_test_split
 
 
 #Extractor import
@@ -183,10 +184,15 @@ class Command(BaseCommand):
 
     def run_predictions(self, dataset, num_feature, final_columns, predictions_result, labels, projectShort):
 
+        print("output - predictions result:",predictions_result)
+        dataset.to_csv(predictions_result+'_dataset.csv' , encoding='utf-8', header=True, index=True , sep=',') #x = dataset
+        idx = dataset.index
+        print("dataset idx:",idx)
+
         max_f = final_columns[len(final_columns)-1]
         min_f = final_columns[0]
         print('min:',min_f,' max:',max_f)
-        print('dataset:',dataset.columns)
+        print('dataset cols:',dataset.columns)
         # each project's model was trained with different number of columns! JabRef has 720. 
         #X_test = dataset.iloc[:,2:len(dataset.columns)]
         if projectShort == 'jabref':
@@ -201,11 +207,13 @@ class Command(BaseCommand):
         print('X_test:',X_test.columns)
         print('X_text',X_test.shape)
         ids = X_test.index
-        print('ids',ids)
+        print("X_test ids:",ids)
+        
         i = 9 #CV used from the training model
         
         # load the model to disk
         filename = predictions_result
+        print('filename:',filename)
         clf = pickle.load(open(filename, 'rb'))
         print('model loaded')
 
@@ -215,15 +223,180 @@ class Command(BaseCommand):
        
         print('dataframe created', predictions.shape, predictions.columns)
        
-        #predictions.to_csv(predictions_result+str(i)+'.csv', encoding='utf-8', sep=',')    
+        predictions.to_csv(predictions_result+str(i)+'.csv', encoding='utf-8', sep=',')    
 
         data_merge = dataset.loc[:,'IssueNumber_dc':'IssueTitle']
         data_mergeDF = pd.DataFrame(data_merge)
         print('data merge created', data_mergeDF.columns)
         mergedDf = predictions.merge(data_mergeDF, left_index=True, right_index=True)
         print('mergeDF created',mergedDf.columns)
-        #mergedDf.to_csv(predictions_result+'_data_merge-' + str(i) +'.csv' , encoding='utf-8', header=True, index=False , sep=',') #x = prediction
+        mergedDf.to_csv(predictions_result+'_data_merge-' + str(i) +'.csv' , encoding='utf-8', header=True, index=False , sep=',') #x = prediction
         return mergedDf
+
+    def run_predictions_train_test(self, dataset, num_feature, final_columns, predictions_result, labels, projectShort):
+
+        max_f = final_columns[len(final_columns)-1]
+        min_f = final_columns[0]
+        print('min:',min_f,' max:',max_f)
+        print('dataset cols:',dataset.columns)
+        print("dataset:", dataset)
+        test_i=dataset.index
+        # each project's model was trained with different number of columns! JabRef has 720. 
+        #X_test = dataset.iloc[:,2:len(dataset.columns)]
+        if projectShort == 'jabref':
+            sliced = dataset.iloc[:,4:724].copy()
+        elif projectShort == 'powertoys':
+                sliced = dataset.iloc[:,4:2058].copy()
+        id_corpus_test = dataset.iloc[:,0:2].copy()
+        print("id_corpus_test cols:",id_corpus_test.columns)
+        print("id_corpus_test:",id_corpus_test.shape)
+
+        print("sliced type",type(sliced))
+        print("sliced shape",sliced.shape)
+        X_test = sliced.reset_index(drop=True)
+        #print("X_test type",type(X_test))
+        X_test.columns.astype(str)
+        print('X_test cols:',X_test.columns)
+        print('X_test',X_test.shape)
+        ids = X_test.index
+        print('ids',ids)
+        
+        if projectShort == 'jabref': 
+ 
+            y_test = pd.DataFrame(columns=['Network', 'DB', 'Interpreter', 'Logging', 'Data Structure', 'i18n', 'Setup', 'Microservices', 'Test', 'IO', 'UI', 'App'])
+            print("populating y_test")
+            print("y_test cols:",y_test.columns)
+
+            test = pd.concat([y_test,X_test], axis=1)
+            test['Network'] = 0
+            test['DB'] = 0
+            test['Interpreter'] = 0
+            test['Logging'] = 0
+            test['Data Structure'] = 0
+            test['i18n'] = 0
+            test['Setup'] = 0
+            test['Microservices'] = 0
+            test['Test'] = 0
+            test['IO'] = 0
+            test['UI'] = 0
+            test['App'] = 0
+
+            print("test:",test)
+            print("Test columns:",test.columns)
+
+        elif projectShort == 'powertoys': 
+
+            y_test = pd.DataFrame(columns=['APM', 'Interpreter', 'Logging', 'Data Structure', 'i18n', 'Setup','Logic', 'Microservices', 'Test', 'Search', 'UI', 'Parser', 'App'])
+            print("populating y_test")
+            print("y_test cols:",y_test.columns)
+
+            #print("y_test",y_test)
+            test = pd.concat([y_test,X_test], axis=1)
+            test['APM'] = 0
+            test['Interpreter'] = 0
+            test['Logging'] = 0
+            test['Data Structure'] = 0
+            test['i18n'] = 0
+            test['Setup'] = 0
+            test['Logic'] = 0
+            test['Microservices'] = 0
+            test['Test'] = 0
+            test['Search'] = 0
+            test['UI'] = 0
+            test['Parser'] = 0
+            test['App'] = 0
+
+            print("test:",test)
+            print("Test columns:",test.columns)
+
+        train_csv = pd.read_csv(predictions_result)
+        print("Train_csv columns:",train_csv.columns)
+        del train_csv['prNumber']
+        del train_csv['corpus']
+        train_csv.rename(columns={'issueNumberissueNumber': 'IssueNumber_dc'}, inplace=True)
+        #del train[0]    
+        train_csv.drop(train_csv.columns[0],axis=1,inplace=True)
+        print("train_csv",train_csv.columns)
+        print("train_csv",train_csv.shape)
+        id_corpus_train = train_csv.iloc[:,0:1].copy()
+        id_corpus_train ['IssueText'] = np.nan
+        id_corpus_train ['IssueTitle'] = np.nan
+        print("id_corpus_traincols:",id_corpus_train.columns)
+        print("id_corpus_train:",id_corpus_train.shape)
+        id_corpus = pd.concat([id_corpus_train,id_corpus_test], axis=0)
+        print("id_corpus cols:",id_corpus.columns)
+        print("id_corpus:",id_corpus.shape)
+
+        if projectShort == 'jabref':
+            X_train = train_csv.iloc[:,13:734].copy() #720 tfidf features + issue number = 721 tfidf powertoys training dataset + 12 labels + 1 = 734
+            y_train = train_csv.iloc[:,1:13] 
+        elif projectShort == 'powertoys':
+                X_train = train_csv.iloc[:,14:2068].copy() #2053 tfidf features + issue number = 2054 tfidf powertoys training dataset + 13 labels + 1 = 2068
+                y_train = train_csv.iloc[:,1:14] 
+
+        X_train.rename(columns={'issueNumberissueNumber.1': '0'}, inplace=True)
+        print("X_train data:",X_train)
+        #X_train.columns.astype(int)
+        X_train.columns = np.arange(len(X_train.columns))
+        print("X_train cols",X_train.columns)
+        print("X_train",X_train.shape)
+        print("y_train cols",y_train.columns)
+        print("y_train",y_train.shape)
+        print("y_train",y_train)
+        train = pd.concat([y_train,X_train], axis=1)
+        dataset_fit = pd.concat([train,test], axis=0)
+        #idx = dataset_fit.index
+        print('dataset_fit cols:',dataset_fit.columns)
+        print('dataset_fit:',dataset_fit.shape)
+        print("dataset_fit:",dataset_fit)
+        if projectShort == 'jabref':
+            ds_X = dataset_fit.iloc[:,13:724].copy()
+            ds_y = dataset_fit.iloc[:,0:12] #12 labels
+        elif projectShort == 'powertoys':
+                ds_X = dataset_fit.iloc[:,14:2068].copy() #2054 + 13 labels + 1
+                ds_y = dataset_fit.iloc[:,0:13] 
+
+        print("ds_X",ds_X.shape)
+        print("ds_y cols",ds_y.columns)
+        print("ds_y",ds_y.shape)
+
+        X = pd.concat([X_train,X_test], axis=0, 
+                  ignore_index = True)
+        y = pd.concat([y_train,
+        y_test], axis=0)
+        print("X cols",X.columns)
+         
+        print("X",X.shape)
+        print("y cols",y.columns)
+        print("y",y.shape)
+        
+        X_train_n, X_test_n, y_train_n, y_test_n = train_test_split(ds_X, ds_y, test_size=0.8, random_state=42)
+        idx = y_test_n.index
+        print('idx',idx)
+        clf = BinaryRelevance(classifier=RandomForestClassifier(criterion='entropy',max_depth= 50, min_samples_leaf= 1, min_samples_split= 3, n_estimators= 50), require_dense = [False, True])
+        clf.fit(X_train_n,y_train_n)
+
+        predict = clf.predict(X_test_n).toarray()
+        print('predictions obtained', type(predict))
+        #predictions = pd.DataFrame(predict, index=ids, columns=labels) # with header
+        predictions = pd.DataFrame(predict, index=idx, columns=labels) # with header
+       
+        print('dataframe created', predictions.shape, predictions.columns)
+       
+        predictions.to_csv(predictions_result+'.csv', encoding='utf-8', sep=',')    
+
+        data_merge = id_corpus.loc[:,'IssueNumber_dc':'IssueTitle']
+        data_mergeDF = pd.DataFrame(data_merge)
+        print('data merge created', data_mergeDF.columns)
+        mergedDf = predictions.merge(data_mergeDF, left_index=True, right_index=True)
+        print('mergeDF cols',mergedDf.columns)
+        print('mergeDF shape',mergedDf.shape)
+        #mergedDf.dropna(inplace=True) 
+        mergedDf = mergedDf[mergedDf['IssueText'].notna()]
+        print('mergeDF shape after removed NaN',mergedDf.shape)
+        mergedDf.to_csv(predictions_result+'_data_merge_POC.csv' , encoding='utf-8', header=True, index=False , sep=',') #x = prediction
+        return mergedDf
+
 
     def classifyMinedIssuesTFIDF(self, issuesDF, project, projectShort):
             print("Running TFIDF with all model.")
@@ -253,7 +426,8 @@ class Command(BaseCommand):
 
             data_classifier, categories = self.merging_fast(data_test1, features)  
 
-            predictions_result = MODEL_PATH_TFIDF + projectShort + '_model.sav'
+            predictions_result = MODEL_PATH_TFIDF + projectShort + '.csv'
+            #predictions_result = MODEL_PATH_TFIDF + projectShort + '_model.sav'
             print("model at:", predictions_result, "project:",project)
             
             final_columns = data_classifier.columns
@@ -265,7 +439,8 @@ class Command(BaseCommand):
             elif projectShort == 'powertoys':
                 labels = ['APM','Interpreter','Logging','Data Structure','i18n','Setup','Logic','Microservices','Test','Search','UI','Parser','App']
 
-            predictions = self.run_predictions(data_classifier, num_feature, final_columns, predictions_result, labels, projectShort)
+            #predictions = self.run_predictions(data_classifier, num_feature, final_columns, predictions_result, labels, projectShort)
+            predictions = self.run_predictions_train_test(data_classifier, num_feature, final_columns, predictions_result, labels, projectShort)
 
             issueTitles = []
             issueNumbers = []
