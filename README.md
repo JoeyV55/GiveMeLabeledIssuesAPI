@@ -1,5 +1,5 @@
 # GiveMeLabeledIssuesAPI
-This is the backend REST API interface that accepts requests to mine and classify open source issues from supported projects. The REST API allows access to both the BERT and TF-IDF (coming soon!) text classification models. 
+This is the backend REST API interface that accepts requests to mine and classify open source issues from supported projects. The REST API allows access to both the BERT and TF-IDF text classification models. 
 
 [![DOI](https://zenodo.org/badge/486040723.svg)](https://zenodo.org/badge/latestdoi/486040723)
 
