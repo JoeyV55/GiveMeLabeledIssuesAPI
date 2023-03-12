@@ -1,0 +1,3 @@
+[submodule "OSLextractor"]
+	path = OSLextractor
+	url = https://github.com/JoeyV55/OSLextractor.git
