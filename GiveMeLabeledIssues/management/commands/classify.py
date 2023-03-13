@@ -3,14 +3,8 @@ from fast_bert.prediction import BertClassificationPredictor
 from GiveMeLabeledIssues.BERT.databaseUtils import *
 
 #TF-IDF imports and cleaning
-from nltk.corpus import stopwords 
-from nltk.tokenize import word_tokenize 
-from nltk.stem.snowball import SnowballStemmer
-from sklearn.feature_extraction.text import CountVectorizer
-from os import path
-from sklearn.metrics import hamming_loss, accuracy_score, roc_curve, auc, roc_auc_score, f1_score, multilabel_confusion_matrix, precision_recall_fscore_support
+import os
 import pandas as pd
-import numpy as np
 
 
 #import apex
@@ -22,7 +16,12 @@ from OSLextractor.repo_extractor import conf, schema
 from OSLextractor.repo_extractor.extractor import github_extractor
 from OSLextractor.repo_extractor.utils import file_io_utils as file_io
 
-MINING_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/docs/example_io/example_cfg.json'
+#print(type(os.path.abspath(os.curdir)))
+MINING_PATH = (os.path.abspath(os.curdir)) + '/OSLextractor/docs/example_io/example_cfg.json'
+MODEL_PATH = (os.path.abspath(os.curdir)) + '/GiveMeLabeledIssues/BERT/BERTModels/output/model_out/'
+LABEL_PATH = (os.path.abspath(os.curdir)) + '/GiveMeLabeledIssues/BERT/BERTModels/labels/all/'
+print("MODEL PATH: " + MODEL_PATH)
+print("LABEL PATH: " + LABEL_PATH)
 PROBABILITY_THRESHOLD = .5
 ISSUE_LIMIT = 10
 class Command(BaseCommand):
@@ -49,8 +48,8 @@ class Command(BaseCommand):
             if issuesDict[issueNum]["body"] is not None:
                 bodyText = issuesDict[issueNum]["body"]
 
-            print("BODY TEXT: ", type(issuesDict[issueNum]["body"]))
-            print("TITLE TEXT: ", type(titleText)) 
+            print("BODY TEXT: ", issuesDict[issueNum]["body"])
+            print("TITLE TEXT: ", titleText) 
             issueTexts.append(bodyText + titleText)
             issueTitles.append(titleText)
             index += 1
@@ -91,8 +90,7 @@ class Command(BaseCommand):
 
     def classifyMinedIssuesBERT(self, issueNumbers, issueTexts, issueTitles, project):
         print("Running Bert with all model.")
-        MODEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/BERTModels/output/model_out/'
-        LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/BERTModels/labels/all/'
+
         #print(LABEL_PATH)
         predictor = BertClassificationPredictor(
                     model_path=MODEL_PATH,
@@ -128,12 +126,13 @@ class Command(BaseCommand):
 
     def extractIssuesAndClassify(self, project, classifier):
         """Driver function for GitHub Repo Extractor."""
-        
         tab: str = " " * 4
 
         cfg_dict: dict = get_user_cfg(MINING_PATH)
         cfg_obj = conf.Cfg(cfg_dict, schema.cfg_schema)
-
+        print(os.path.abspath(os.curdir))
+        os.chdir("../")
+        print(os.path.abspath(os.curdir))
         # init extractor object
         print("\nInitializing extractor...")
         gh_ext = github_extractor.Extractor(project, cfg_obj)
