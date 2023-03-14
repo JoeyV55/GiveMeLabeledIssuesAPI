@@ -1,7 +1,7 @@
 {
     "repo": "JabRef/jabref",
-    "auth_path": "/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/pyGHTok.txt",
-    "output_path": "/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/output/issueOutput.json",
+    "auth_path": "/mnt/c/Users/josep/Documents/REPREX/GiveMeLabeledIssuesAPI/OSLextractor/pyGHTok.txt",
+    "output_path": "/mnt/c/Users/josep/Documents/REPREX/GiveMeLabeledIssuesAPI/OSLextractor/output/issueOutput.json",
     "range": [
         0,
         10000
