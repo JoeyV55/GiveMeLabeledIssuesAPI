@@ -26,7 +26,6 @@ from OSLextractor.repo_extractor.extractor import github_extractor
 MINING_PATH = (os.path.abspath(os.curdir)) + '/OSLextractor/docs/example_io/example_cfg.json'
 MODEL_PATH_TFIDF = (os.path.abspath(os.curdir)) + '/GiveMeLabeledIssues/TFIDF/TFIDFModels/'
 LABEL_PATH_TFIDF = (os.path.abspath(os.curdir)) + '/GiveMeLabeledIssues/TFIDF/TFIDFModels/'
-PROBABILITY_THRESHOLD = .5
 ISSUE_LIMIT = 10
 class Command(BaseCommand):
     help = 'Populates the project issue database tables.'
@@ -56,17 +55,6 @@ class Command(BaseCommand):
         print(issuesDf.head())
         return issuesDf
 
-    def filterLabels(self, issueLabels):
-        labelStr = ""
-        i = 0
-        for label in issueLabels:
-        # print(label)
-            if label[1] >= PROBABILITY_THRESHOLD:
-                labelStr += label[0]
-                if i != len(issueLabels) - 1 and issueLabels[i + 1][1] >= PROBABILITY_THRESHOLD:
-                    labelStr += ','
-            i += 1
-        return labelStr
 
     def clean_data(self, data_test1):
         if not sys.warnoptions:
@@ -183,7 +171,7 @@ class Command(BaseCommand):
 
     #build the model 
     def build_model(self, test_type):
-        clf = BinaryRelevance(classifier=RandomForestClassifier(criterion='entropy',max_depth= 50, min_samples_leaf= 1, min_samples_split= 3, n_estimators= 50), require_dense = [False, True])
+        clf = BinaryRelevance(classifier=RandomForestClassifier(criterion='entropy', max_depth= 100, min_samples_leaf= 1, min_samples_split= 3, n_estimators= 50), require_dense = [False, True])
 
         return clf
 
@@ -417,9 +405,8 @@ class Command(BaseCommand):
             if stop_word == 'Yes':
                 re_stop_words = self.remove_stop_words()
                 data_test1['IssueText'] = data_test1['IssueText'].apply(self.removeStopWords, re_stop_words=re_stop_words)
-            data = data_test1
 
-            data_test1 = self.apply_stem(data)
+            data_test1 = self.apply_stem(data_test1)
            # print('data_test1',data_test1.columns)
 
             docs, a = self.analyze_top(data_test1)
