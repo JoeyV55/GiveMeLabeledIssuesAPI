@@ -6,15 +6,42 @@ This is the backend REST API interface that accepts requests to mine and classif
 
 # How to install
 
-Run these commands to run to serve and run the API
-1. Review the system requirements and install the packages needed to run [fast-bert](https://github.com/utterworks/fast-bert)
-2. The packages needed to run the API should be within the issuesenv included in this repo. 
-  
-  <blockquote>source <PATH TO issuesenv>/bin/activate</blockquote>  
-  
-3. Run the server:
+Run these commands to get the necessary dependencies
+1. You must have a trained BERT model to run the BERT version of this API. Review the system requirements to run [fast-bert](https://github.com/utterworks/fast-bert). Our implementation of fast-bert and our training scripts are available at the [training repo](https://github.com/JoeyV55/BERTTraining). This requires CUDA to run the classification commands. CUDA is not needed to serve the API by itself, however. A sample database is pushed to this repository for your use in running the server for some sample issues. 
 
-<blockquote>python manage.py runserver</blockquote>
+2. Create a virtual environment from the root of this repository:
+  
+    python3 -m venv reprexenv
+
+2. Activate the new environment using
+  
+  <blockquote>source <PATH TO reprexenv>/bin/activate</blockquote>  
+  Your terminal will show (reprexenv) as a prefix if you activated the environment correctly: 
+  Example:
+  
+  <blockquote> (reprexenv) ➜  GiveMeLabeledIssuesAPI (master) python3 -m venv reprexenv</blockquote>
+  
+3. Install needed packages into reprexenv. From the root directory of this repo run:
+  
+      pip install -r requirements.txt
+
+
+<h2>Populating the database with labelled issues (must meet the system requirements for fast-bert and have a trained model, putting it under GiveMeLabeledIssues/BERT/BERTModels)</h2>
+
+1. Run BERT to classify open issues with your selected project.
+  <blockquote>Classify Command</blockquote> 
+     
+     python manage.py classify <PROJECT> <CLASSIFIER>
+  
+<blockquote>Example</blockquote> 
+  
+     python manage.py classify jabref BERT
+
+<h2>Running the server (sample database pushed to this repo to test this)</h2>
+
+<blockquote>Run the server:</blockquote>
+
+    python manage.py runserver
 
 
 # Architecture
