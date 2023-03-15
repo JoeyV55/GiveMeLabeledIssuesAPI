@@ -1,9 +1,12 @@
 import sys
+import os
 import warnings
 from django.core.management.base import BaseCommand
 from GiveMeLabeledIssues.databaseUtils import *
 import numpy as np
 #TF-IDF imports and cleaning
+import nltk
+nltk.download('stopwords')
 from nltk.corpus import stopwords 
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer 
@@ -20,7 +23,9 @@ from OSLextractor.extractor_driver import get_user_cfg
 from OSLextractor.repo_extractor import conf, schema
 from OSLextractor.repo_extractor.extractor import github_extractor
 
-MINING_PATH = '/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/OSLextractor/docs/example_io/example_cfg.json'
+MINING_PATH = (os.path.abspath(os.curdir)) + '/OSLextractor/docs/example_io/example_cfg.json'
+MODEL_PATH_TFIDF = (os.path.abspath(os.curdir)) + '/GiveMeLabeledIssues/TFIDF/TFIDFModels/'
+LABEL_PATH_TFIDF = (os.path.abspath(os.curdir)) + '/GiveMeLabeledIssues/TFIDF/TFIDFModels/'
 PROBABILITY_THRESHOLD = .5
 ISSUE_LIMIT = 10
 class Command(BaseCommand):
@@ -134,7 +139,7 @@ class Command(BaseCommand):
         cv = CountVectorizer()
         cv_fit=cv.fit_transform(docs)
 
-        word_list = cv.get_feature_names()   
+        word_list = cv.get_feature_names_out()   
 
         count_list = cv_fit.toarray().sum(axis=0)
         term_frequency = dict(zip(word_list,count_list))
@@ -155,7 +160,7 @@ class Command(BaseCommand):
             
         tf_idf_results = vectorizer.fit_transform(data['IssueText'])
 
-        features = vectorizer.get_feature_names()
+        features = vectorizer.get_feature_names_out()
 
         scores = (tf_idf_results.toarray())
         output_tf_idf = pd.DataFrame(scores)
@@ -400,9 +405,6 @@ class Command(BaseCommand):
 
     def classifyMinedIssuesTFIDF(self, issuesDF, project, projectShort):
             print("Running TFIDF with all model.")
-            MODEL_PATH_TFIDF = '/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/GiveMeLabeledIssues/TFIDF/TFIDFModels/'
-            #example: /Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/GiveMeLabeledIssues/TFIDF/TFIDFModels/jabref_finalized_model.sav
-            LABEL_PATH_TFIDF = '/Users/fd252/Documents/GitHub/GiveMeLabeledIssuesAPI-1/TFIDF/TFIDFModels/'
             
             #TF-IDF set up
             configurationTFIDF=(1,1) #unigrams # Used to read the right model on the file system
