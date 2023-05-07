@@ -313,8 +313,9 @@ class Command(BaseCommand):
         print("train_csv",train_csv.shape)
         id_corpus_train = train_csv.iloc[:,0:1].copy()
         id_corpus_train ['IssueText'] = np.nan
-        id_corpus_train ['IssueTitle'] = np.nan
+        id_corpus_train ['IssueTitle'] = dataset['IssueTitle']
         print("id_corpus_traincols:",id_corpus_train.columns)
+        print("ID CORPUS: ", id_corpus_train['IssueTitle'])
         print("id_corpus_train:",id_corpus_train.shape)
         id_corpus = pd.concat([id_corpus_train,id_corpus_test], axis=0)
         print("id_corpus cols:",id_corpus.columns)
@@ -386,6 +387,7 @@ class Command(BaseCommand):
         print('mergeDF shape',mergedDf.shape)
         #mergedDf.dropna(inplace=True) 
         mergedDf = mergedDf[mergedDf['IssueText'].notna()]
+        mergedDf["IssueTitle"] = dataset["IssueTitle"]
         print('mergeDF shape after removed NaN',mergedDf.shape)
         mergedDf.to_csv(predictions_result+'_data_merge_POC.csv' , encoding='utf-8', header=True, index=False , sep=',') #x = prediction
         return mergedDf
