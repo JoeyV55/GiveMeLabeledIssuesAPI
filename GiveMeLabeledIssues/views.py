@@ -28,8 +28,8 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 class QueryIssuesView(views.APIView):
     def get(self, request, project, domains):
-        print("Hit Mine endpoint with GET request!")
         domainsList = domains.split(',')
+        print("Hit QueryIssues endpoint with GET")
         project = project.replace(',', '/')
         print(project)
         print(domains)

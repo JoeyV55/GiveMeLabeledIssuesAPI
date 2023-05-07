@@ -8,35 +8,37 @@ issueLimit = 10
 threshold = .5
     
 def findIssues(project, labels):
-    print("Running Bert with all model.")
+    print("Finding issues with labels: ", labels)
     LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
     labelsDict = {}
-    projectQs = []
+    projectQs = {}
     issues = []
     requestVals = {"issues": []}
 
     if project == "JabRef/jabref":
         projectQs = JabRefIssue.objects.filter(issueLabels__contains=labels[0])
+        print("QS LEN for first label ", labels[0], ": ", len(projectQs))
 
-        for label in labels:
-            currQs = JabRefIssue.objects.filter(issueLabels__contains=label)
-            projectQs.intersection(currQs, projectQs)
+        for i in range(1, len(labels)):
+            currQs = JabRefIssue.objects.filter(issueLabels__contains=labels[i])
+            print("CURR QS LEN for label ",labels[i], ": ", len(currQs))
+            projectQs = projectQs | currQs
+            print("Project QS after union with set for label: ", labels[i], ": ", len(projectQs))
 
-        for issue in projectQs:
-            print(issue.issueText)
+        # for issue in projectQs:
+        #     print(issue.issueText)
 
         
     elif project == "microsoft/PowerToys":
         projectQs = PowerToysIssue.objects.filter(issueLabels__contains=labels[0])
 
-        for label in labels:
-            currQs = PowerToysIssue.objects.filter(issueLabels__contains=label)
-            projectQs.intersection(currQs, projectQs)
-
-    i = 0
+        for i in range(1, len(labels)):
+            currQs = PowerToysIssue.objects.filter(issueLabels__contains=labels[i])
+            projectQs = projectQs | currQs
     
+    j = 0
     for issue in projectQs:
-        print("ISSUE: ", i)        
+
         labelStr = issue.issueLabels
         issueDict = {}
         issueDict["issueTitle"] = issue.issueTitle
@@ -44,6 +46,8 @@ def findIssues(project, labels):
         issueDict["issueText"] = issue.issueText
         issueDict["issueLabels"] = labelStr
         requestVals["issues"].append(issueDict)
+        print("ISSUE: ", issue.issueNumber, " Labels: ", labelStr)        
+        j+=1
     return requestVals
 
 
