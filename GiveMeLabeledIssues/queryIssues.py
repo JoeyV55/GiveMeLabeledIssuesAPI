@@ -1,6 +1,4 @@
 from GiveMeLabeledIssues.models import *
-MODEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/output/model_out/'
-MINING_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/OSLextractor/docs/example_io/example_cfg.json'
 
 
 #Testing limit on number of issues classified.
@@ -9,7 +7,6 @@ threshold = .5
     
 def findIssues(project, labels):
     print("Finding issues with labels: ", labels)
-    LABEL_PATH = '/mnt/e/RESEARCH/GRAD/GiveMeLabeledIssuesAPI/GiveMeLabeledIssues/BERT/labels/all/'
     labelsDict = {}
     projectQs = {}
     issues = []
@@ -44,7 +41,7 @@ def findIssues(project, labels):
         issueDict["issueTitle"] = issue.issueTitle
         issueDict["issueNumber"] = issue.issueNumber
         issueDict["issueText"] = issue.issueText
-        issueDict["issueLabels"] = labelStr
+        issueDict["issueLabels"] = labelStr.rstrip(',')
         requestVals["issues"].append(issueDict)
         print("ISSUE: ", issue.issueNumber, " Labels: ", labelStr)        
         j+=1
